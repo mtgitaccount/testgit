@@ -1,6 +1,6 @@
-#minefieldcalc {
+#Cockpit {
   position: fixed;
-  bottom: 50px;
+  bottom: 30px;
   left: 10px;
   z-index: 1000;
   color: yellow;
@@ -54,7 +54,7 @@
   position: relative;
   /*top: 220px;*/
   width: 400px;
-  height: 85px;
+  height: 100%;
   line-height: 15px;
   font-size: 11px;
   padding: 0 5px 0 5px;
@@ -79,8 +79,8 @@
 .specialInfo {
   position: relative;
   /*top: 220px;*/
-  width: 380px;
-  height: 20px;
+  width: 350px;
+  height: 100%;
   line-height: 15px;
   font-size: 11px;
   padding: 0 5px 0 5px;
