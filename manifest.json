@@ -9,8 +9,8 @@
         "https://planets.nu/*",
         "https://*/*"
       ],
-      "js": ["mines.js"],
-      "css": ["mines.css"]
+      "js": ["cockpit.js"],
+      "css": ["cockpit.css"]
     }
   ]
 }
