@@ -62,13 +62,6 @@ function wrapper() { // wrapper for injection
   var vueapp = {};
 
 
-
-
-
-
-
-
-
   var old_hotkey = vgap.hotkey;
   var toggleMinecalc = true;
   //overwriting the original method
@@ -272,7 +265,7 @@ function wrapper() { // wrapper for injection
 
 
   function buildMFView() {
-    let html = "<div id='minefieldcalc' v-bind:class='{hide: notActive}'>";
+    let html = "<div id='Cockpit' v-bind:class='{hide: notActive}'>";
 
     //<input type="text" autofocus v-bind:disabled="inputDisabled" v-model:value="inputValue" v-on:input="handleInput" name="inputfield">
 
@@ -311,6 +304,7 @@ function wrapper() { // wrapper for injection
     html += "<div class='specialInfo'>";
     html += "{{vgap.getHull(this.selecthull).special}}"
     html += "</div>";
+
 
     html += "<div id='myBuildPartInfo'>";
     html += "<div class='BuildPartProp'><label>Mass</label><span>{{currhull.mass}} kt</span></div>";
@@ -385,7 +379,7 @@ function wrapper() { // wrapper for injection
   function buildVueApp() {
 
     let vueapp = new Vue({
-      el: '#minefieldcalc',
+      el: '#Cockpit',
       data: {
         notActive: true,
         hasbeams: false,
