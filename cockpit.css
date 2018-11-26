@@ -1,0 +1,88 @@
+#minefieldcalc {
+  position: fixed;
+  bottom: 50px;
+  left: 10px;
+  z-index: 1000;
+  color: yellow;
+}
+
+.hide {
+  visibility: hidden;
+}
+
+.red {
+  color: red;
+}
+
+.lvalmines {
+  font-size: 12px;
+  line-height: 20px;
+  color: #fff;
+  position: relative;
+  font-family: arial;
+  /* min-width: 160px; */
+  margin-right: 10px;
+}
+
+.lvalmines::before {
+  content: "";
+  font-family: "Font Awesome 5 Free";
+  display: inline-block;
+  width: 17px;
+  margin-right: 3px;
+  font-style: normal;
+  font-variant: normal;
+  text-rendering: auto;
+  font-weight: 900;
+  color: #999;
+  -webkit-font-smoothing: antialiased;
+  text-align: center;
+}
+
+#myBuildPartInfo {
+  position: relative;
+  /*top: 220px;*/
+  width: 195px;
+  height: 65px;
+  line-height: 15px;
+  font-size: 11px;
+  padding: 0 5px 0 5px;
+  color: grey;
+}
+
+#myPartInfo {
+  position: relative;
+  /*top: 220px;*/
+  width: 400px;
+  height: 85px;
+  line-height: 15px;
+  font-size: 11px;
+  padding: 0 5px 0 5px;
+  color: grey;
+}
+
+.engineres {
+  float: left;
+}
+
+.restable {
+  display: block;
+  float: left;
+  position: relative;
+}
+
+.sumcosts {
+  float: left;
+  line-height: 20px;
+}
+
+.specialInfo {
+  position: relative;
+  /*top: 220px;*/
+  width: 380px;
+  height: 20px;
+  line-height: 15px;
+  font-size: 11px;
+  padding: 0 5px 0 5px;
+  color: grey;
+}
