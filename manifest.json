@@ -1,0 +1,16 @@
+{
+  "manifest_version": 2,
+  "name": "vgap.nu minefield caclulation",
+  "version": "1.0",
+  "content_scripts" :[
+    {
+      "matches": [
+        "http://planets.nu/*",
+        "https://planets.nu/*",
+        "https://*/*"
+      ],
+      "js": ["mines.js"],
+      "css": ["mines.css"]
+    }
+  ]
+}
