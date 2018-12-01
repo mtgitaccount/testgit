@@ -557,7 +557,6 @@ function wrapper() { // wrapper for injection
         }
       },
       computed: {
-
         selectrace: function (){
           return vgap.race.id;
         },
