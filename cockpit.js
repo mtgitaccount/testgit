@@ -282,15 +282,19 @@ function wrapper() { // wrapper for injection
     html += "<tr><td id='units'>Units: {{decay}}</td><td id='radius'>Radius: {{decayradius}}</td><td class='red'>diff: {{diff}}</td></tr>";
     html += "<tr><td id='units'>mine hit: {{mhit}}%</td><td id='radius'>cloakd hit: {{cmhit}}%</td><td id='radius'>web hit: {{webhit}}%</td></tr>";
     html += "</table>";
+
     html += "<select v-model='sweeping' v-on:change='sweep'>";
     html += "<option v-for='beam in beams' v-bind:value='beam.value'>{{ beam.text }} </option>";
     html += "</select>";
+
     html += "<table>";
     html += "<tr><td id='units'>sweep: {{sweepmine}}</td><td id='radius'>web: {{sweepweb}}</td></tr>";
     html += "</table>";
+
     html += "<select v-model='selectrace'>";
     html += "<option v-for='race in races' v-bind:value='race.id'>{{ race.adjective }} </option>";
     html += "</select>";
+
     html += "<select v-model='selecthull' v-on:change='getHullSpec();calculateSum()'>";
     html += "<option v-for='hull in hulls' v-bind:value='hull.id'>TL:{{hull.techlevel}} - {{ hull.name }} </option>";
     html += "</select>";
@@ -391,6 +395,7 @@ function wrapper() { // wrapper for injection
         selectbeam: 1,
         selectengine: 1,
         selecttorp: 1,
+        selecthull: 1,
         hullmc: 0,
         hulldur: 0,
         hulltri: 0,
@@ -407,8 +412,6 @@ function wrapper() { // wrapper for injection
         minesweeprate: 4,
         websweeprate: 3,
         sweeping: 1,
-        selectrace: 1,
-        selecthull: 1,
         races: vgap.races,
         selected: 1,
         options: [{
@@ -554,6 +557,10 @@ function wrapper() { // wrapper for injection
         }
       },
       computed: {
+
+        selectrace: function (){
+          return vgap.race.id;
+        },
         mhit: function() {
           return 100 - Math.round(Math.pow((100-this.minetravel)/100,this.radius)*100);
         },
