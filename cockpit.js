@@ -278,7 +278,10 @@ function wrapper() { // wrapper for injection
     html += "</select>";
     html += "<label for='checkbox'>Robot:</label><input type='checkbox' id='checkbox' v-model='isrobot' v-on:change='calculate'>"
     html += "<table>";
-    html += "<tr><td id='units'>Units: {{units}}</td><td id='radius'>Radius: {{radius}}</td><td class='red'>mc: {{fieldmc}}</td></tr>";
+    html += "<tr><td id='units'>Units: <input classe='cp_input' maxlenght='4' size='4' v-model='units' value='{{units}}' v-on:change='calculateNom(); calculate()'></td>";
+    html += "<td id='radius'>Radius: <input classe='cp_input' maxlenght='4' size='4' v-model='radius' value='{{radius}}' v-on:change='calculateNomByRadius(); calculate()'></td><td class='red'>mc: {{fieldmc}}</td></tr>";
+
+
     html += "<tr><td id='units'>Units: {{decay}}</td><td id='radius'>Radius: {{decayradius}}</td><td class='red'>diff: {{diff}}</td></tr>";
     html += "<tr><td id='units'>mine hit: {{mhit}}%</td><td id='radius'>cloakd hit: {{cmhit}}%</td><td id='radius'>web hit: {{webhit}}%</td></tr>";
     html += "</table>";
@@ -396,12 +399,14 @@ function wrapper() { // wrapper for injection
         selectengine: 1,
         selecttorp: 1,
         selecthull: 1,
+        selectrace: vgap.race.id,
         hullmc: 0,
         hulldur: 0,
         hulltri: 0,
         hullmol: 0,
         units: 0,
         nom: 10,
+        radius:0,
         isrobot: false,
         minedecay: 5,
         decay: 0,
@@ -509,14 +514,25 @@ function wrapper() { // wrapper for injection
       },
       methods: {
         calculate: function() {
-          console.log("VUE Event fired");
+          //console.log("VUE Event fired");
 
           this.units = this.nom * this.selected;
           this.isrobot ? this.units *=4 : this.unis;
-          //this.radius = Math.round(Math.sqrt(this.units));
-          this.decay = Math.round((100 - this.minedecay) / 100 * this.units);
-          this.decayradius = Math.round(Math.sqrt(this.decay));
+          this.radius = Math.trunc(Math.sqrt(this.units));
+
+          this.decay = Math.trunc((100 - this.minedecay) / 100 * this.units);
+          this.decayradius = Math.trunc(Math.sqrt(this.decay));
         },
+        calculateNom: function() {
+          //this.nom = this.units / this.selected;
+          this.isrobot ? this.nom = this.units/(this.selected*4) : this.nom = this.units/this.selected;
+        },
+        calculateNomByRadius: function() {
+          //this.nom = this.radius * this.radius / this.selected;
+          this.isrobot ? this.nom = Math.round(100 * this.radius * this.radius / (this.selected*4))/100 : this.nom = Math.round(100 *this.radius * this.radius / this.selected)/100;
+          //console.log("Change Radius:", this.radius, this.nom);
+        },
+
         sweep: function(){
           this.sweepmine = Math.round((this.units/(this.sweeping * this.minesweeprate))*100)/100;
           this.sweepweb = Math.round((this.units/(this.sweeping * this.websweeprate))*100)/100;
@@ -557,9 +573,6 @@ function wrapper() { // wrapper for injection
         }
       },
       computed: {
-        selectrace: function (){
-          return vgap.race.id;
-        },
         mhit: function() {
           return 100 - Math.round(Math.pow((100-this.minetravel)/100,this.radius)*100);
         },
@@ -569,9 +582,9 @@ function wrapper() { // wrapper for injection
         webhit: function() {
           return 100 - Math.round(Math.pow((100-this.webtravel)/100,this.radius)*100);
         },
-        radius: function() {
-          return Math.round(Math.sqrt(this.units));
-        },
+        /*radius: function() {
+          return Math.trunc(Math.sqrt(this.units));
+        },*/
         diff:function() {
           return this.decay - this.units;
         },
@@ -638,3 +651,37 @@ script.textContent = "(" + wrapper + ")();";
 
 document.body.appendChild(script);
 //document.body.removeChild(script);
+
+
+/* Save my redraw and filter adjustments
+
+colorForPlanetOwner: function(owner) {
+
+        var mycolor = "#b86614";
+        var racecolor = ["666666","ff0000", "ff00ff", "ffffff", "5F95EC", "00ff00", "00ffff", "FFCCCC", "ff6600", "4C0566", "B71414", "C39A10"];
+         //  var racecolor = ["ff0000", "ff00ff", "ffffff", "0000ff", "00ff00", "00ffff", "ffff00", "ff6600", "ffccff", "669966", "666699"];
+        //console.log("Owner: ", owner, vgap.relations[owner-1]);
+
+        if (owner == 0) {
+            return "#666666";
+        } else return owner == vgap.player.id ? mycolor : "#" + racecolor[owner];
+    },
+
+
+colorForShipOwner: function(owner) {
+
+       var racecolor = ["666666","ff0000", "ff00ff", "ffffff", "5F95EC", "00ff00", "00ffff", "FFCCCC", "ff6600", "4C0566", "B71414", "C39A10"];
+       // var racecolor = ["ff0000", "ff00ff", "ffffff", "0000ff", "00ff00", "00ffff", "ffff00", "ff6600", "ffccff", "669966", "666699"];
+
+       var mycolor = "#b86614";
+
+
+       if (owner == 0) { // ghost ship
+           return "#666666";
+       } else  return owner == vgap.player.id ? mycolor : "#" + racecolor[owner];
+
+
+   },
+
+
+*/
