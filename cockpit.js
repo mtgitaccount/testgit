@@ -274,7 +274,7 @@ function wrapper() { // wrapper for injection
 
     html += "<label for='torp-select'>Torp: </label>";
     html += "<select v-model='selected' v-on:change='calculate'>";
-    html += "<option v-for='option in options' v-bind:value='option.value'>{{ option.text }} </option>";
+    html += "<option v-for='option in options' v-bind:value='option.id * option.id'>TL:{{option.techlevel}} {{ option.name }} c:{{option.crewkill}} d:{{option.damage}}</option>";
     html += "</select>";
     html += "<label for='checkbox'>Robot:</label><input type='checkbox' id='checkbox' v-model='isrobot' v-on:change='calculate'>"
     html += "<table>";
@@ -287,7 +287,7 @@ function wrapper() { // wrapper for injection
     html += "</table>";
 
     html += "<select v-model='sweeping' v-on:change='sweep'>";
-    html += "<option v-for='beam in beams' v-bind:value='beam.value'>{{ beam.text }} </option>";
+    html += "<option v-for='(beam, key, index) in vgap.beams' v-bind:value=key+1>TL:{{ beam.techlevel }} {{ beam.name }} c:{{ beam.crewkill }} d:{{ beam.damage }} s:{{(key+1)*(key+1)}}</option>";
     html += "</select>";
 
     html += "<table>";
@@ -419,98 +419,7 @@ function wrapper() { // wrapper for injection
         sweeping: 1,
         races: vgap.races,
         selected: 1,
-        options: [{
-            text: 'MK 1 Photon',
-            value: 1,
-            mc: 1
-          },
-          {
-            text: 'Proton Torp',
-            value: 4,
-            mc: 2
-          },
-          {
-            text: 'MK 1 Photon',
-            value: 9,
-            mc: 5
-          },
-          {
-            text: 'Gamma Bomb',
-            value: 16,
-            mc: 10
-          },
-          {
-            text: 'MK 3 Photon',
-            value: 25,
-            mc: 12
-          },
-          {
-            text: 'MK 4 Photon',
-            value: 36,
-            mc: 13
-          },
-          {
-            text: 'MK 5 Photon',
-            value: 49,
-            mc: 31
-          },
-          {
-            text: 'MK 6 Photon',
-            value: 64,
-            mc: 35
-          },
-          {
-            text: 'MK 7 Photon',
-            value: 81,
-            mc: 36
-          },
-          {
-            text: 'MK 8 Photon',
-            value: 100,
-            mc: 54
-          }
-        ],
-        beams: [{
-            text: 'Laser',
-            value: 1
-          },
-          {
-            text: 'X-Ray Laser',
-            value: 4
-          },
-          {
-            text: 'Plasma Bolt',
-            value: 9
-          },
-          {
-            text: 'Blaster',
-            value: 16
-          },
-          {
-            text: 'Positron Beam',
-            value: 25
-          },
-          {
-            text: 'Disruptor',
-            value: 36
-          },
-          {
-            text: 'Heavy Blaster',
-            value: 49
-          },
-          {
-            text: 'Phaser',
-            value: 64
-          },
-          {
-            text: 'Heavy Disruptor',
-            value: 81
-          },
-          {
-            text: 'Heavy Phaser',
-            value: 100
-          }
-        ]
+        options: vgap.torpedos
       },
       methods: {
         calculate: function() {
@@ -534,8 +443,9 @@ function wrapper() { // wrapper for injection
         },
 
         sweep: function(){
-          this.sweepmine = Math.round((this.units/(this.sweeping * this.minesweeprate))*100)/100;
-          this.sweepweb = Math.round((this.units/(this.sweeping * this.websweeprate))*100)/100;
+
+          this.sweepmine = Math.round((this.units/(this.sweeping * this.sweeping * this.minesweeprate))*100)/100;
+          this.sweepweb = Math.round((this.units/(this.sweeping * this.sweeping * this.websweeprate))*100)/100;
         },
         getHullSpec: function(){
           this.hullmc = vgap.getHull(this.selecthull).cost;
@@ -589,19 +499,22 @@ function wrapper() { // wrapper for injection
           return this.decay - this.units;
         },
         sweepmine: function() {
-          return Math.round((this.units/(this.sweeping * this.minesweeprate))*100)/100;
+          //console.log(this.sweeping);
+          return Math.round((this.units/(this.sweeping * this.sweeping * this.minesweeprate))*100)/100;
         },
         sweepweb: function() {
-          return Math.round((this.units/(this.sweeping * this.websweeprate))*100)/100;
+          return Math.round((this.units/(this.sweeping * this.sweeping * this.websweeprate))*100)/100;
         },
         fieldmc: function (){
           let price = 1;
+          /*
           for (let i in this.options) {
             if (this.options[i].value == this.selected) {
               price = this.options[i].mc;
               break;
             }
-          }
+          }*/
+          price = this.options[Math.sqrt(this.selected)-1].torpedocost;
           return this.nom * price;
         },
         hulls: function(){
