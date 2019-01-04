@@ -84,7 +84,6 @@ function wrapper() { // wrapper for injection
 
 
       /*
-
             var markup = {
               type: "circle",
               x: vgap.map.x,
@@ -270,21 +269,24 @@ function wrapper() { // wrapper for injection
     //<input type="text" autofocus v-bind:disabled="inputDisabled" v-model:value="inputValue" v-on:input="handleInput" name="inputfield">
 
 
-    html += "#: <input id='nom' maxlenght='4' size='4' v-model='nom' v-on:input='calculate'>";
+    html += "#: <input id='nom' class='cp_input' maxlenght='4' size='4' v-model='nom' v-on:input='calculate'>";
 
     html += "<label for='torp-select'>Torp: </label>";
     html += "<select v-model='selected' v-on:change='calculate'>";
-    html += "<option v-for='option in options' v-bind:value='option.value'>{{ option.text }} </option>";
+    html += "<option v-for='option in options' v-bind:value='option.id * option.id'>TL:{{option.techlevel}} {{ option.name }} c:{{option.crewkill}} d:{{option.damage}}</option>";
     html += "</select>";
     html += "<label for='checkbox'>Robot:</label><input type='checkbox' id='checkbox' v-model='isrobot' v-on:change='calculate'>"
     html += "<table>";
-    html += "<tr><td id='units'>Units: {{units}}</td><td id='radius'>Radius: {{radius}}</td><td class='red'>mc: {{fieldmc}}</td></tr>";
+    html += "<tr><td id='units'>Units: <input class='cp_input' maxlenght='4' size='4' v-model='units' value='{{units}}' v-on:change='calculateNom(); calculate()'></td>";
+    html += "<td id='radius'>Radius: <input class='cp_input' maxlenght='4' size='4' v-model='radius' value='{{radius}}' v-on:change='calculateNomByRadius(); calculate()'></td><td class='red'>mc: {{fieldmc}}</td></tr>";
+
+
     html += "<tr><td id='units'>Units: {{decay}}</td><td id='radius'>Radius: {{decayradius}}</td><td class='red'>diff: {{diff}}</td></tr>";
     html += "<tr><td id='units'>mine hit: {{mhit}}%</td><td id='radius'>cloakd hit: {{cmhit}}%</td><td id='radius'>web hit: {{webhit}}%</td></tr>";
     html += "</table>";
 
     html += "<select v-model='sweeping' v-on:change='sweep'>";
-    html += "<option v-for='beam in beams' v-bind:value='beam.value'>{{ beam.text }} </option>";
+    html += "<option v-for='(beam, key, index) in vgap.beams' v-bind:value=key+1>TL:{{ beam.techlevel }} {{ beam.name }} c:{{ beam.crewkill }} d:{{ beam.damage }} s:{{(key+1)*(key+1)}}</option>";
     html += "</select>";
 
     html += "<table>";
@@ -394,14 +396,16 @@ function wrapper() { // wrapper for injection
         summol: 0,
         selectbeam: 1,
         selectengine: 1,
-        selecttorp: 1,
+        selecttorp: 6,
         selecthull: 1,
+        selectrace: vgap.race.id,
         hullmc: 0,
         hulldur: 0,
         hulltri: 0,
         hullmol: 0,
         units: 0,
         nom: 10,
+        radius:0,
         isrobot: false,
         minedecay: 5,
         decay: 0,
@@ -413,113 +417,34 @@ function wrapper() { // wrapper for injection
         websweeprate: 3,
         sweeping: 1,
         races: vgap.races,
-        selected: 1,
-        options: [{
-            text: 'MK 1 Photon',
-            value: 1,
-            mc: 1
-          },
-          {
-            text: 'Proton Torp',
-            value: 4,
-            mc: 2
-          },
-          {
-            text: 'MK 1 Photon',
-            value: 9,
-            mc: 5
-          },
-          {
-            text: 'Gamma Bomb',
-            value: 16,
-            mc: 10
-          },
-          {
-            text: 'MK 3 Photon',
-            value: 25,
-            mc: 12
-          },
-          {
-            text: 'MK 4 Photon',
-            value: 36,
-            mc: 13
-          },
-          {
-            text: 'MK 5 Photon',
-            value: 49,
-            mc: 31
-          },
-          {
-            text: 'MK 6 Photon',
-            value: 64,
-            mc: 35
-          },
-          {
-            text: 'MK 7 Photon',
-            value: 81,
-            mc: 36
-          },
-          {
-            text: 'MK 8 Photon',
-            value: 100,
-            mc: 54
-          }
-        ],
-        beams: [{
-            text: 'Laser',
-            value: 1
-          },
-          {
-            text: 'X-Ray Laser',
-            value: 4
-          },
-          {
-            text: 'Plasma Bolt',
-            value: 9
-          },
-          {
-            text: 'Blaster',
-            value: 16
-          },
-          {
-            text: 'Positron Beam',
-            value: 25
-          },
-          {
-            text: 'Disruptor',
-            value: 36
-          },
-          {
-            text: 'Heavy Blaster',
-            value: 49
-          },
-          {
-            text: 'Phaser',
-            value: 64
-          },
-          {
-            text: 'Heavy Disruptor',
-            value: 81
-          },
-          {
-            text: 'Heavy Phaser',
-            value: 100
-          }
-        ]
+        selected: 36,    // Torp Id 6 => 6*6 = 36
+        options: vgap.torpedos
       },
       methods: {
         calculate: function() {
-          console.log("VUE Event fired");
+          //console.log("VUE Event fired");
 
           this.units = this.nom * this.selected;
           this.isrobot ? this.units *=4 : this.unis;
-          //this.radius = Math.round(Math.sqrt(this.units));
-          this.decay = Math.round((100 - this.minedecay) / 100 * this.units);
-          this.decayradius = Math.round(Math.sqrt(this.decay));
+          this.radius = Math.trunc(Math.sqrt(this.units));
+
+          this.decay = Math.trunc((100 - this.minedecay) / 100 * this.units)-1;
+          this.decayradius = Math.trunc(Math.sqrt(this.decay));
         },
+        calculateNom: function() {
+          //this.nom = this.units / this.selected;
+          this.isrobot ? this.nom = this.units/(this.selected*4) : this.nom = this.units/this.selected;
+        },
+        calculateNomByRadius: function() {
+          //this.nom = this.radius * this.radius / this.selected;
+          this.isrobot ? this.nom = Math.round(100 * this.radius * this.radius / (this.selected*4))/100 : this.nom = Math.round(100 *this.radius * this.radius / this.selected)/100;
+          //console.log("Change Radius:", this.radius, this.nom);
+        },
+
         sweep: function(){
-          this.sweepmine = Math.round((this.units/(this.sweeping * this.minesweeprate))*100)/100;
-          this.sweepweb = Math.round((this.units/(this.sweeping * this.websweeprate))*100)/100;
+
+          this.sweepmine = Math.round((this.units/(this.sweeping * this.sweeping * this.minesweeprate))*100)/100;
+          this.sweepweb = Math.round((this.units/(this.sweeping * this.sweeping * this.websweeprate))*100)/100;
         },
         getHullSpec: function(){
           this.hullmc = vgap.getHull(this.selecthull).cost;
@@ -557,9 +482,6 @@ function wrapper() { // wrapper for injection
         }
       },
       computed: {
-        selectrace: function (){
-          return vgap.race.id;
-        },
         mhit: function() {
           return 100 - Math.round(Math.pow((100-this.minetravel)/100,this.radius)*100);
         },
@@ -569,26 +491,29 @@ function wrapper() { // wrapper for injection
         webhit: function() {
           return 100 - Math.round(Math.pow((100-this.webtravel)/100,this.radius)*100);
         },
-        radius: function() {
-          return Math.round(Math.sqrt(this.units));
-        },
+        /*radius: function() {
+          return Math.trunc(Math.sqrt(this.units));
+        },*/
         diff:function() {
           return this.decay - this.units;
         },
         sweepmine: function() {
-          return Math.round((this.units/(this.sweeping * this.minesweeprate))*100)/100;
+          //console.log(this.sweeping);
+          return Math.round((this.units/(this.sweeping * this.sweeping * this.minesweeprate))*100)/100;
         },
         sweepweb: function() {
-          return Math.round((this.units/(this.sweeping * this.websweeprate))*100)/100;
+          return Math.round((this.units/(this.sweeping * this.sweeping * this.websweeprate))*100)/100;
         },
         fieldmc: function (){
           let price = 1;
+          /*
           for (let i in this.options) {
             if (this.options[i].value == this.selected) {
               price = this.options[i].mc;
               break;
             }
-          }
+          }*/
+          price = this.options[Math.sqrt(this.selected)-1].torpedocost;
           return this.nom * price;
         },
         hulls: function(){
@@ -638,3 +563,37 @@ script.textContent = "(" + wrapper + ")();";
 
 document.body.appendChild(script);
 //document.body.removeChild(script);
+
+
+/* Save my redraw and filter adjustments
+
+colorForPlanetOwner: function(owner) {
+
+        var mycolor = "#b86614";
+        var racecolor = ["666666","ff0000", "ff00ff", "ffffff", "5F95EC", "00ff00", "00ffff", "FFCCCC", "ff6600", "4C0566", "B71414", "C39A10"];
+         //  var racecolor = ["ff0000", "ff00ff", "ffffff", "0000ff", "00ff00", "00ffff", "ffff00", "ff6600", "ffccff", "669966", "666699"];
+        //console.log("Owner: ", owner, vgap.relations[owner-1]);
+
+        if (owner == 0) {
+            return "#666666";
+        } else return owner == vgap.player.id ? mycolor : "#" + racecolor[owner];
+    },
+
+
+colorForShipOwner: function(owner) {
+
+       var racecolor = ["666666","ff0000", "ff00ff", "ffffff", "5F95EC", "00ff00", "00ffff", "FFCCCC", "ff6600", "4C0566", "B71414", "C39A10"];
+       // var racecolor = ["ff0000", "ff00ff", "ffffff", "0000ff", "00ff00", "00ffff", "ffff00", "ff6600", "ffccff", "669966", "666699"];
+
+       var mycolor = "#b86614";
+
+
+       if (owner == 0) { // ghost ship
+           return "#666666";
+       } else  return owner == vgap.player.id ? mycolor : "#" + racecolor[owner];
+
+
+   },
+
+
+*/
