@@ -84,7 +84,6 @@ function wrapper() { // wrapper for injection
 
 
       /*
-
             var markup = {
               type: "circle",
               x: vgap.map.x,
@@ -270,7 +269,7 @@ function wrapper() { // wrapper for injection
     //<input type="text" autofocus v-bind:disabled="inputDisabled" v-model:value="inputValue" v-on:input="handleInput" name="inputfield">
 
 
-    html += "#: <input id='nom' maxlenght='4' size='4' v-model='nom' v-on:input='calculate'>";
+    html += "#: <input id='nom' class='cp_input' maxlenght='4' size='4' v-model='nom' v-on:input='calculate'>";
 
     html += "<label for='torp-select'>Torp: </label>";
     html += "<select v-model='selected' v-on:change='calculate'>";
@@ -278,8 +277,8 @@ function wrapper() { // wrapper for injection
     html += "</select>";
     html += "<label for='checkbox'>Robot:</label><input type='checkbox' id='checkbox' v-model='isrobot' v-on:change='calculate'>"
     html += "<table>";
-    html += "<tr><td id='units'>Units: <input classe='cp_input' maxlenght='4' size='4' v-model='units' value='{{units}}' v-on:change='calculateNom(); calculate()'></td>";
-    html += "<td id='radius'>Radius: <input classe='cp_input' maxlenght='4' size='4' v-model='radius' value='{{radius}}' v-on:change='calculateNomByRadius(); calculate()'></td><td class='red'>mc: {{fieldmc}}</td></tr>";
+    html += "<tr><td id='units'>Units: <input class='cp_input' maxlenght='4' size='4' v-model='units' value='{{units}}' v-on:change='calculateNom(); calculate()'></td>";
+    html += "<td id='radius'>Radius: <input class='cp_input' maxlenght='4' size='4' v-model='radius' value='{{radius}}' v-on:change='calculateNomByRadius(); calculate()'></td><td class='red'>mc: {{fieldmc}}</td></tr>";
 
 
     html += "<tr><td id='units'>Units: {{decay}}</td><td id='radius'>Radius: {{decayradius}}</td><td class='red'>diff: {{diff}}</td></tr>";
@@ -397,7 +396,7 @@ function wrapper() { // wrapper for injection
         summol: 0,
         selectbeam: 1,
         selectengine: 1,
-        selecttorp: 1,
+        selecttorp: 6,
         selecthull: 1,
         selectrace: vgap.race.id,
         hullmc: 0,
@@ -418,7 +417,7 @@ function wrapper() { // wrapper for injection
         websweeprate: 3,
         sweeping: 1,
         races: vgap.races,
-        selected: 1,
+        selected: 36,    // Torp Id 6 => 6*6 = 36
         options: vgap.torpedos
       },
       methods: {
@@ -429,7 +428,7 @@ function wrapper() { // wrapper for injection
           this.isrobot ? this.units *=4 : this.unis;
           this.radius = Math.trunc(Math.sqrt(this.units));
 
-          this.decay = Math.trunc((100 - this.minedecay) / 100 * this.units);
+          this.decay = Math.trunc((100 - this.minedecay) / 100 * this.units)-1;
           this.decayradius = Math.trunc(Math.sqrt(this.decay));
         },
         calculateNom: function() {
