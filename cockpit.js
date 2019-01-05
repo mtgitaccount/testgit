@@ -50,8 +50,6 @@ function wrapper() { // wrapper for injection
   };
 
   //overwrite core function
-  var nu_shipscan = sharedContent.prototype.shipScan;
-
   sharedContent.prototype.shipScan = function(ship) {
 
     //console.log("Calling custom shipScan:", arguments);
@@ -93,12 +91,23 @@ function wrapper() { // wrapper for injection
     var tower = vgap.isTowTarget(ship.id);
     //html += "<div class='" + cls + "'>" + nu.t.mass + ": " + ship.mass + "</div>";
     if (ship.ownerid != vgap.player.id) {
+
+       //save mass of current turn to local Storage
+       if (localStorage.getItem(vgap.game.id +"."+ vgap.nowTurn + "." + ship.id) == null) {
+         localStorage.setItem(vgap.game.id +"."+ vgap.nowTurn + "." + ship.id, ship.mass);
+       }
+
         html += "<div>Mass: " + ship.mass + " kt</div>";
         if (ship.heading > 0)
             html += "<div>Heading: " + ship.heading + "</div>";
         html += "<hr/><div>" + race.shortname + "<br/>(" + player.username + ")</div>";
         html += "<hr/><div>Threat: " + vgap.getThreatLevel(hull) + "</div>";
-        html += "<hr/><div>Tank: " + hull.fueltank + "  Cargo: "+ hull.cargo + "  Hull: " + hull.mass+" </div>"
+        html += "<hr/><div>Tank: " + hull.fueltank + "  Cargo: "+ hull.cargo + "  Hull: " + hull.mass+" </div>";
+
+        //console.log("get from Local Storage: ", localStorage.getItem(vgap.game.id +"."+ eval(vgap.nowTurn-1) + "." + ship.id) );
+        let massdiff = localStorage.getItem(vgap.game.id +"."+ eval(vgap.nowTurn-1) + "." + ship.id) != null ? hull.mass - parseInt(localStorage.getItem(vgap.game.id +"."+ eval(vgap.nowTurn-1) + "." + ship.id)) : 0 ;
+        console.log("Massdiff", massdiff);
+        html += "<hr/><div>Massdiff: "+ massdiff + "kt</div>";
     }
     else {
 
