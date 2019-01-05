@@ -49,6 +49,95 @@ function wrapper() { // wrapper for injection
     vgaPlanets.prototype.addOns[addOnName].current = {};
   };
 
+  //overwrite core function
+  var nu_shipscan = sharedContent.prototype.shipScan;
+
+  sharedContent.prototype.shipScan = function(ship) {
+
+    //console.log("Calling custom shipScan:", arguments);
+    //return nu_shipscan.apply(this, arguments);
+
+
+    //taking the code form the original function and adding some Stuff
+
+    var hull = vgap.getHull(ship.hullid);
+
+    var player = vgap.getPlayer(ship.ownerid);
+    var race = vgap.getRace(player.raceid);
+    var note = vgap.getNote(ship.id, 2);
+
+    var cls = "";
+    if (ship.ownerid == vgap.player.id)
+        cls = "MyItem";
+    else if (vgap.allied(ship.ownerid))
+        cls = "AllyItem";
+    else if (ship.ownerid != vgap.player.id)
+        cls = "EnemyItem";
+
+    var html = "<div class='ItemSelection " + cls + "' data-id='" + ship.id + "'>";
+    html += "<img src='" + ship.img + "'/>";
+
+    var cloaked = "";
+    if (ship.iscloaked)
+        cloaked = "<div class='sval cloak'></div>"
+
+    html += "<div class='ItemTitle'><div class='sval warp'>" + ship.warp + "</div>" + cloaked + Math.abs(ship.id) + ": " + ship.name + "</div>";
+
+    //if (ship.iscloaked)
+    //    html += "<div class='sval cloak' style='margin-right: 50px;'></div>"
+
+    //html += "<span class='" + cls + "'>" + hull.name + "</span>";
+    var heading = ship.heading;
+    if (heading == -1)
+        heading = nu.t.unknown;
+    var tower = vgap.isTowTarget(ship.id);
+    //html += "<div class='" + cls + "'>" + nu.t.mass + ": " + ship.mass + "</div>";
+    if (ship.ownerid != vgap.player.id) {
+        html += "<div>Mass: " + ship.mass + " kt</div>";
+        if (ship.heading > 0)
+            html += "<div>Heading: " + ship.heading + "</div>";
+        html += "<hr/><div>" + race.shortname + "<br/>(" + player.username + ")</div>";
+        html += "<hr/><div>Threat: " + vgap.getThreatLevel(hull) + "</div>";
+        html += "<hr/><div>Tank: " + hull.fueltank + "  Cargo: "+ hull.cargo + "  Hull: " + hull.mass+" </div>"
+    }
+    else {
+
+        if (vgap.gameUsesFuel())
+            html += "<div class='lval neu'>" + ship.neutronium + "</div>";
+        if (vgap.gameUsesSupplies())
+            html += "<div class='lval supplies' " + (ship.supplies == 0 ? "style='display:none;'" : "") + ">" + ship.supplies + "</div>";
+
+        html += "<div class='lval mc' " + (ship.megacredits == 0 ? "style='display:none;'" : "") + ">" + ship.megacredits + "</div>";
+        html += "<div class='lval dur' " + (ship.duranium == 0 ? "style='display:none;'" : "") + ">" + ship.duranium + "</div>";
+        html += "<div class='lval tri' " + (ship.tritanium == 0 ? "style='display:none;'" : "") + ">" + ship.tritanium + "</div>";
+        html += "<div class='lval mol' " + (ship.molybdenum == 0 ? "style='display:none;'" : "") + ">" + ship.molybdenum + "</div>";
+        html += "<div class='lval clans' " + (ship.clans == 0 ? "style='display:none;'" : "") + ">" + ship.clans + "</div>";
+        if (vgap.gameUsesAmmo()) {
+            if (hull.launchers > 0)
+                html += "<div class='lval torpedo'>" + ship.ammo + "</div>";
+            if (hull.fighterbays > 0)
+                html += "<div class='lval fighters'>" + ship.ammo + "</div>";
+        }
+
+    }
+    if (tower != null)
+        html += "<div style='color:#990099;margin-top:10px;'>" + nu.t.towedbyship + " s" + tower.id + "</div>";
+
+    if (note != null)
+        html += "<hr/><div class='GoodTextNote'>" + note.body.replace(/\n/g, "<br/>") + "</div>";
+
+    html += "</div>";
+
+    return html;
+
+
+
+
+  }
+
+
+
+
   vgaPlanets.prototype.setupAddOn("Minefields");
 
 
@@ -405,7 +494,7 @@ function wrapper() { // wrapper for injection
         hullmol: 0,
         units: 0,
         nom: 10,
-        radius:0,
+        radius: 0,
         isrobot: false,
         minedecay: 5,
         decay: 0,
@@ -417,7 +506,7 @@ function wrapper() { // wrapper for injection
         websweeprate: 3,
         sweeping: 1,
         races: vgap.races,
-        selected: 36,    // Torp Id 6 => 6*6 = 36
+        selected: 36, // Torp Id 6 => 6*6 = 36
         options: vgap.torpedos
       },
       methods: {
@@ -425,28 +514,28 @@ function wrapper() { // wrapper for injection
           //console.log("VUE Event fired");
 
           this.units = this.nom * this.selected;
-          this.isrobot ? this.units *=4 : this.unis;
+          this.isrobot ? this.units *= 4 : this.unis;
           this.radius = Math.trunc(Math.sqrt(this.units));
 
-          this.decay = Math.trunc((100 - this.minedecay) / 100 * this.units)-1;
+          this.decay = Math.trunc((100 - this.minedecay) / 100 * this.units) - 1;
           this.decayradius = Math.trunc(Math.sqrt(this.decay));
         },
         calculateNom: function() {
           //this.nom = this.units / this.selected;
-          this.isrobot ? this.nom = this.units/(this.selected*4) : this.nom = this.units/this.selected;
+          this.isrobot ? this.nom = this.units / (this.selected * 4) : this.nom = this.units / this.selected;
         },
         calculateNomByRadius: function() {
           //this.nom = this.radius * this.radius / this.selected;
-          this.isrobot ? this.nom = Math.round(100 * this.radius * this.radius / (this.selected*4))/100 : this.nom = Math.round(100 *this.radius * this.radius / this.selected)/100;
+          this.isrobot ? this.nom = Math.round(100 * this.radius * this.radius / (this.selected * 4)) / 100 : this.nom = Math.round(100 * this.radius * this.radius / this.selected) / 100;
           //console.log("Change Radius:", this.radius, this.nom);
         },
 
-        sweep: function(){
+        sweep: function() {
 
-          this.sweepmine = Math.round((this.units/(this.sweeping * this.sweeping * this.minesweeprate))*100)/100;
-          this.sweepweb = Math.round((this.units/(this.sweeping * this.sweeping * this.websweeprate))*100)/100;
+          this.sweepmine = Math.round((this.units / (this.sweeping * this.sweeping * this.minesweeprate)) * 100) / 100;
+          this.sweepweb = Math.round((this.units / (this.sweeping * this.sweeping * this.websweeprate)) * 100) / 100;
         },
-        getHullSpec: function(){
+        getHullSpec: function() {
           this.hullmc = vgap.getHull(this.selecthull).cost;
           this.hulldur = vgap.getHull(this.selecthull).duranium;
           this.hulltri = vgap.getHull(this.selecthull).tritanium;
@@ -454,11 +543,11 @@ function wrapper() { // wrapper for injection
           this.hasbeams = vgap.getHull(this.selecthull).beams && 1;
           this.hastorps = vgap.getHull(this.selecthull).launchers && 1;
         },
-        calculateSum: function(){
+        calculateSum: function() {
 
           let enginecount = vgap.getHull(this.selecthull).engines;
 
-          this.summc = this.hullmc + enginecount * vgap.getEngine(this.selectengine).cost ;
+          this.summc = this.hullmc + enginecount * vgap.getEngine(this.selectengine).cost;
           this.sumdur = this.hulldur + enginecount * vgap.getEngine(this.selectengine).duranium;
           this.summol = this.hullmol + enginecount * vgap.getEngine(this.selectengine).molybdenum;
           this.sumtri = this.hulltri + enginecount * vgap.getEngine(this.selectengine).tritanium;
@@ -483,28 +572,28 @@ function wrapper() { // wrapper for injection
       },
       computed: {
         mhit: function() {
-          return 100 - Math.round(Math.pow((100-this.minetravel)/100,this.radius)*100);
+          return 100 - Math.round(Math.pow((100 - this.minetravel) / 100, this.radius) * 100);
         },
         cmhit: function() {
-          return 100 - Math.round(Math.pow((100-this.minetravelcloaked)/100,this.radius)*100);
+          return 100 - Math.round(Math.pow((100 - this.minetravelcloaked) / 100, this.radius) * 100);
         },
         webhit: function() {
-          return 100 - Math.round(Math.pow((100-this.webtravel)/100,this.radius)*100);
+          return 100 - Math.round(Math.pow((100 - this.webtravel) / 100, this.radius) * 100);
         },
         /*radius: function() {
           return Math.trunc(Math.sqrt(this.units));
         },*/
-        diff:function() {
+        diff: function() {
           return this.decay - this.units;
         },
         sweepmine: function() {
           //console.log(this.sweeping);
-          return Math.round((this.units/(this.sweeping * this.sweeping * this.minesweeprate))*100)/100;
+          return Math.round((this.units / (this.sweeping * this.sweeping * this.minesweeprate)) * 100) / 100;
         },
         sweepweb: function() {
-          return Math.round((this.units/(this.sweeping * this.sweeping * this.websweeprate))*100)/100;
+          return Math.round((this.units / (this.sweeping * this.sweeping * this.websweeprate)) * 100) / 100;
         },
-        fieldmc: function (){
+        fieldmc: function() {
           let price = 1;
           /*
           for (let i in this.options) {
@@ -513,22 +602,22 @@ function wrapper() { // wrapper for injection
               break;
             }
           }*/
-          price = this.options[Math.sqrt(this.selected)-1].torpedocost;
+          price = this.options[Math.sqrt(this.selected) - 1].torpedocost;
           return this.nom * price;
         },
-        hulls: function(){
+        hulls: function() {
           let result = [];
           let hullstring = vgap.races[this.selectrace].basehulls;
-          if(vgap.settings.campaignmode) hullstring = vgap.races[this.selectrace].hulls;
+          if (vgap.settings.campaignmode) hullstring = vgap.races[this.selectrace].hulls;
 
           let hullarray = hullstring.split(",");
 
-          for (let i=0; i<hullarray.length; i++){
+          for (let i = 0; i < hullarray.length; i++) {
             result.push(vgap.getHull(hullarray[i]));
           }
           return result.sort(compareHulls);
         },
-        currhull: function(){
+        currhull: function() {
           return vgap.getHull(this.selecthull);
         }
 
@@ -539,12 +628,15 @@ function wrapper() { // wrapper for injection
     return vueapp;
   }
 
-//helpers
+  //helpers
 
-function compareHulls(a, b){
-  if (a.techlevel < b.techlevel) return -1;
-  else if (a.techlevel > b.techlevel) return 1;
-}
+  function compareHulls(a, b) {
+    if (a.techlevel < b.techlevel) return -1;
+    else if (a.techlevel > b.techlevel) return 1;
+  }
+
+
+
 
 
 } //wrapper for injection
@@ -566,6 +658,8 @@ document.body.appendChild(script);
 
 
 /* Save my redraw and filter adjustments
+
+https://superuser.com/questions/626932/cisco-anyconnect-secure-mobility-client-service-can-not-start-on-windows-7-64-bi
 
 colorForPlanetOwner: function(owner) {
 
