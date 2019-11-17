@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name          Planets.nu map drawing
-// @description   Allows marking up map with circles, lines, points, and text
+// @name          chrome extension for Planets.nu - cockpit
+// @description   shows additioal information regarding ship builidng costs, military scores, and mine filed claculation
 // @include       http://planets.nu/home
 // @include       http://planets.nu/games/*
 // @include       http://*.planets.nu/*
