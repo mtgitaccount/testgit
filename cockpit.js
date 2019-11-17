@@ -8,29 +8,6 @@
 // @version 1
 // ==/UserScript==
 
-/*------------------------------------------------------------------------------
-Creates 2 new map tools:
-
-"Draw" - Allows drawing various things on map. Once "Draw" is selected, clicks
-    on the map will draw instead of accessing ships, setting waypoints etc.
-    You can also use the options at top to create/rename/delete separate layers
-    to organize your drawn objects. To exit "Draw" mode, click "Starmap".
-
-"Layers" - Brings up a list of all the layers you have created with the "Draw"
-    tool above. Each has a checkbox which can be used to show or hide that
-    particular layer.
-
-NOTE: "snap waypoints" under the point settings will override snapping to other
-    ships' waypoints, if a click is near both.
-
-(ver 0.6) fix for client vgap2.js ver 1.30
-(ver 0.7) fix for using time machine
-(ver 0.7) patch for changes to note color functions
-(ver 0.8) fixes color selector box size
-(ver 0.9) fixes new color box position issue
-(ver 0.10)adds basic editing tools
-(ver 0.13)update for new .nu version (3+)
-------------------------------------------------------------------------------*/
 
 
 function wrapper() { // wrapper for injection
@@ -105,8 +82,8 @@ function wrapper() { // wrapper for injection
         html += "<hr/><div>Tank: " + hull.fueltank + "  Cargo: "+ hull.cargo + "  Hull: " + hull.mass+" </div>";
 
         //console.log("get from Local Storage: ", localStorage.getItem(vgap.game.id +"."+ eval(vgap.nowTurn-1) + "." + ship.id) );
-        let massdiff = localStorage.getItem(vgap.game.id +"."+ eval(vgap.nowTurn-1) + "." + ship.id) != null ? hull.mass - parseInt(localStorage.getItem(vgap.game.id +"."+ eval(vgap.nowTurn-1) + "." + ship.id)) : 0 ;
-        console.log("Massdiff", massdiff);
+        let massdiff = localStorage.getItem(vgap.game.id +"."+ eval(vgap.nowTurn-1) + "." + ship.id) != null ? ship.mass - parseInt(localStorage.getItem(vgap.game.id +"."+ eval(vgap.nowTurn-1) + "." + ship.id)) : 0 ;
+        //console.log("Massdiff", massdiff);
         html += "<hr/><div>Massdiff: "+ massdiff + "kt</div>";
     }
     else {
@@ -427,10 +404,15 @@ function wrapper() { // wrapper for injection
 
     // Sum all costs
     html += "<div class='restable'><span class='sumcosts'>Sum.:</span><table class='engineres'>";
-    html += "<tr><td><div class='lvalmines mc'>{{summc}}</div></td>";
+    html += "<tr>";
+    html += "<td><div class='lvalmines mc'>{{summc}}</div></td>";
     html += "<td><div class='lvalmines dur'>{{sumdur}}</div></td>";
     html += "<td><div class='lvalmines tri'>{{sumtri}}</div></td>";
-    html += "<td><div class='lvalmines mol'>{{summol}}</div></td></tr>";
+    html += "<td><div class='lvalmines mol'>{{summol}}</div></td>";
+
+    html += "<td><span class='sumcosts'>Military Score:</span></td>";
+    html += "<td><div class='sumcost' style='color: white'>{{calculate_military_score}}</div></td></tr>";
+
     html += "</table>";
 
     html += "<div class='engineres'><table class='engineres'>";
@@ -628,6 +610,18 @@ function wrapper() { // wrapper for injection
         },
         currhull: function() {
           return vgap.getHull(this.selecthull);
+        },
+        calculate_military_score: function(){
+          let military_score = 0;
+          military_score = (this.sumdur+ this.sumtri+ this.summol) * 5;
+          military_score += this.summc;
+
+          if(vgap.getHull(this.selecthull).beams == 0 &&
+      	    vgap.getHull(this.selecthull).launchers == 0 &&
+      	    vgap.getHull(this.selecthull).fighterbays == 0) {
+      	       military_score = 0;
+          }
+          return military_score;
         }
 
 
