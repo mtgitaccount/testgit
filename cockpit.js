@@ -20,6 +20,7 @@ function wrapper() { // wrapper for injection
       vgaPlanets.prototype.addOns[addOnName].settings = JSON.parse(settings);
     else
       vgaPlanets.prototype.addOns[addOnName].settings = {};
+
     vgaPlanets.prototype.addOns[addOnName].saveSettings = function() {
       localStorage.setItem(addOnName + ".settings", JSON.stringify(vgaPlanets.prototype.addOns[addOnName].settings));
     }
@@ -70,8 +71,13 @@ function wrapper() { // wrapper for injection
     if (ship.ownerid != vgap.player.id) {
 
        //save mass of current turn to local Storage
-       if (localStorage.getItem(vgap.game.id +"."+ vgap.nowTurn + "." + ship.id) == null) {
+       if (!vgap.inHistory && localStorage.getItem(vgap.game.id +"."+ vgap.nowTurn + "." + ship.id) == null) {
          localStorage.setItem(vgap.game.id +"."+ vgap.nowTurn + "." + ship.id, ship.mass);
+         console.log("Adding mass from current Turn: Ship ID " + ship.id + "  Mass " + ship.mass );
+       } // save mass of past history turns if not already existant
+        else if (vgap.inHistory && localStorage.getItem(vgap.game.id +"."+ vgap.settings.turn + "." + ship.id) == null){
+          localStorage.setItem(vgap.game.id +"."+ vgap.settings.turn + "." + ship.id, ship.mass);
+          console.log("Adding mass from History: Ship ID " + ship.id + "  Mass " + ship.mass );
        }
 
         html += "<div>Mass: " + ship.mass + " kt</div>";
@@ -81,9 +87,23 @@ function wrapper() { // wrapper for injection
         html += "<hr/><div>Threat: " + vgap.getThreatLevel(hull) + "</div>";
         html += "<hr/><div>Tank: " + hull.fueltank + "  Cargo: "+ hull.cargo + "  Hull: " + hull.mass+" </div>";
 
-        //console.log("get from Local Storage: ", localStorage.getItem(vgap.game.id +"."+ eval(vgap.nowTurn-1) + "." + ship.id) );
-        let massdiff = localStorage.getItem(vgap.game.id +"."+ eval(vgap.nowTurn-1) + "." + ship.id) != null ? ship.mass - parseInt(localStorage.getItem(vgap.game.id +"."+ eval(vgap.nowTurn-1) + "." + ship.id)) : 0 ;
-        //console.log("Massdiff", massdiff);
+        //check wether we are scrolling through history
+        let massdiff = 0;
+        if(vgap.inHistory){
+          // the mass of the current turn back in history
+          let current_history_mass = localStorage.getItem(vgap.game.id +"."+ eval(vgap.settings.turn) + "." + ship.id);
+          // the predecessor of the current turn in history
+          let parent_history_mass = localStorage.getItem(vgap.game.id +"."+ eval(vgap.settings.turn-1) + "." + ship.id) != null ? localStorage.getItem(vgap.game.id +"."+ eval(vgap.settings.turn-1) + "." + ship.id) : 0;
+
+          massdiff = parent_history_mass != 0 ? current_history_mass - parent_history_mass : 0;
+
+        }
+        else {
+          //console.log("get from Local Storage: ", localStorage.getItem(vgap.game.id +"."+ eval(vgap.nowTurn-1) + "." + ship.id) );
+          massdiff = localStorage.getItem(vgap.game.id +"."+ eval(vgap.nowTurn-1) + "." + ship.id) != null ? ship.mass - parseInt(localStorage.getItem(vgap.game.id +"."+ eval(vgap.nowTurn-1) + "." + ship.id)) : 0 ;
+          //console.log("Massdiff", massdiff);
+        }
+
         html += "<hr/><div>Massdiff: "+ massdiff + "kt</div>";
     }
     else {
@@ -119,61 +139,37 @@ function wrapper() { // wrapper for injection
 
 
 
-  }
+  }// shipScan function
 
 
 
+  vgaPlanets.prototype.setupAddOn("Cockpit");
 
-  vgaPlanets.prototype.setupAddOn("Minefields");
-
-
-
-  console.log("Vue stuff: ");
-
+//  console.log("Vue stuff: ");
 
 
   //vue Bindings
 
   var vueapp = {};
 
-
   var old_hotkey = vgap.hotkey;
   var toggleMinecalc = true;
+
   //overwriting the original method
   vgap.hotkey = function(e) {
 
-    //minefield calculator bie shit + F9
+    //call cockpit with shit + F9
     if (e.keyCode == 120 && e.shiftKey == true) {
-      console.log("Minefield: Key Event: ", e);
-      console.log("Koordinaten:", vgap.map.x, vgap.map.y);
-
-
+    //  console.log("Minefield: Key Event: ", e);
+    //  console.log("Koordinaten:", vgap.map.x, vgap.map.y);
 
       if (toggleMinecalc) {
-        vgap.addOns.Minefields.vueapp.notActive = false;
+        vgap.addOns.Cockpit.vueapp.notActive = false;
         toggleMinecalc = false;
       } else {
-        vgap.addOns.Minefields.vueapp.notActive = true;
+        vgap.addOns.Cockpit.vueapp.notActive = true;
         toggleMinecalc = true;
       }
-
-
-      /*
-            var markup = {
-              type: "circle",
-              x: vgap.map.x,
-              y: vgap.map.y,
-              r: 100,
-              attr: {
-                stroke: "yellow"
-              }};
-
-            vgap.addOns.vgapMapMarkUp.showDrawTools();
-            vgap.addOns.vgapMapMarkUp.current.markup = markup;
-            vgap.addOns.vgapMapMarkUp.showMarkupParams(markup);
-            vgap.map.draw();
-
-      */
 
     }
 
@@ -235,7 +231,7 @@ function wrapper() { // wrapper for injection
     loadmap: function() {
       console.log("LoadMap: plugin called.");
       buildMFView();
-      vgap.addOns.Minefields.vueapp = buildVueApp();
+      vgap.addOns.Cockpit.vueapp = buildVueApp();
 
       //if (this.overlays != null) this.overlays.remove();
       //vgap.map.overlays_canvas = document.createElement("canvas");
@@ -334,7 +330,7 @@ function wrapper() { // wrapper for injection
   };
 
   // register your plugin with NU
-  vgap.registerPlugin(plugin, "Minefields");
+  vgap.registerPlugin(plugin, "");
 
 
 
@@ -639,10 +635,7 @@ function wrapper() { // wrapper for injection
   }
 
 
-
-
-
-} //wrapper for injection
+} // wrapper
 
 //vue stuff
 
@@ -658,39 +651,3 @@ script.textContent = "(" + wrapper + ")();";
 
 document.body.appendChild(script);
 //document.body.removeChild(script);
-
-
-/* Save my redraw and filter adjustments
-
-https://superuser.com/questions/626932/cisco-anyconnect-secure-mobility-client-service-can-not-start-on-windows-7-64-bi
-
-colorForPlanetOwner: function(owner) {
-
-        var mycolor = "#b86614";
-        var racecolor = ["666666","ff0000", "ff00ff", "ffffff", "5F95EC", "00ff00", "00ffff", "FFCCCC", "ff6600", "4C0566", "B71414", "C39A10"];
-         //  var racecolor = ["ff0000", "ff00ff", "ffffff", "0000ff", "00ff00", "00ffff", "ffff00", "ff6600", "ffccff", "669966", "666699"];
-        //console.log("Owner: ", owner, vgap.relations[owner-1]);
-
-        if (owner == 0) {
-            return "#666666";
-        } else return owner == vgap.player.id ? mycolor : "#" + racecolor[owner];
-    },
-
-
-colorForShipOwner: function(owner) {
-
-       var racecolor = ["666666","ff0000", "ff00ff", "ffffff", "5F95EC", "00ff00", "00ffff", "FFCCCC", "ff6600", "4C0566", "B71414", "C39A10"];
-       // var racecolor = ["ff0000", "ff00ff", "ffffff", "0000ff", "00ff00", "00ffff", "ffff00", "ff6600", "ffccff", "669966", "666699"];
-
-       var mycolor = "#b86614";
-
-
-       if (owner == 0) { // ghost ship
-           return "#666666";
-       } else  return owner == vgap.player.id ? mycolor : "#" + racecolor[owner];
-
-
-   },
-
-
-*/
